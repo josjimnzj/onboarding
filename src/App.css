@@ -1,0 +1,66 @@
+body {
+  background: #f9f9f9;
+}
+
+.cancel-btn {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+}
+
+.progress-bar {
+  background-color: #0062A3;
+}
+
+.btn-primary {
+  background-color: #0062A3;
+  border-color: #0062A3;
+}
+
+.btn-primary:hover {
+  background-color: #004F85;
+}
+
+.conditional-fields {
+  display: none;
+}
+
+.conditional-fields.show {
+  display: block;
+}
+
+.error-message {
+  color: #dc3545;
+  font-size: 0.875rem;
+  margin-top: 0.25rem;
+}
+
+.card {
+  transition: all 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.gauge-container {
+  width: 250px;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.badge {
+  font-size: 1em;
+  padding: 0.5em 1em;
+}
+
+.form-label {
+  font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.form-control:focus {
+  border-color: #0062A3;
+  box-shadow: 0 0 0 0.2rem rgba(0, 98, 163, 0.25);
+} 
