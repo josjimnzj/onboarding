@@ -94,7 +94,7 @@ function App() {
 
   return (
     <div className="container py-4 position-relative" style={{ maxWidth: '480px' }}>
-      {currentStep !== 12 && (
+      { (currentStep !== 12 || currentStep === 0) && (
         <button
           type="button"
           className="btn btn-danger cancel-btn"
