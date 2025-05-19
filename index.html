@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Preview Wizard Onboarding Crédito</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background: #f9f9f9;
+        }
+
+        .step {
+            display: none;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .progress-bar {
+            background-color: #0062A3;
+        }
+
+        .btn-primary {
+            background-color: #0062A3;
+            border-color: #0062A3;
+        }
+
+        .btn-primary:hover {
+            background-color: #004F85;
+        }
+
+        .conditional-fields {
+            display: none;
+        }
+
+        .cancel-btn {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+
+<body>
+    <div class="container py-4 position-relative" style="max-width: 480px;">
+        <button type="button" class="btn btn-danger cancel-btn" onclick="cancelProcess()">Cancelar</button>
+        <h4 class="mb-3 text-center">On Boarding de Crédito</h4>
+        <div class="progress mb-4">
+            <div id="progressBar" class="progress-bar" role="progressbar" style="width: 0%">0%</div>
+        </div>
+        <form id="wizardForm">
+
+            <!-- Paso 0: Selección de producto -->
+            <!-- Paso 1: Selección de producto -->
+            <div class="step active">
+                <h5>1. ¿Qué tipo de crédito desea el cliente?</h5>
+                <form id="productoForm">
+                    <!-- Tipo de crédito -->
+                    <label for="tipoCredito" class="form-label">Tipo de crédito</label>
+                    <select class="form-select mb-2" id="tipoCredito" onchange="mostrarCamposCondicionales()" required>
+                        <option value="">Selecciona una opción</option>
+                        <option value="personal">Préstamo Personal</option>
+                        <option value="hipotecario">Crédito Hipotecario</option>
+                        <option value="auto">Crédito Automotriz</option>
+                    </select>
+                    <div id="errorTipoCredito" class="text-danger mb-2" style="display:none;">
+                        Debe seleccionar un tipo de crédito
+                    </div>
+
+                    <!-- Monto solicitado -->
+                    <label for="montoSolicitado" class="form-label">Monto solicitado (MXN)</label>
+                    <input id="montoSolicitado" class="form-control mb-2" placeholder="Monto solicitado (MXN)"
+                        type="number" min="1" required>
+                    <div id="errorMonto" class="text-danger mb-2" style="display:none;">
+                        El monto solicitado debe ser mayor a cero
+                    </div>
+
+                    <!-- Plazo -->
+                    <label for="plazoSolicitado" class="form-label">Plazo (meses)</label>
+                    <input id="plazoSolicitado" class="form-control mb-2" placeholder="Plazo (meses)" type="number"
+                        min="1" required>
+                    <div id="errorPlazo" class="text-danger mb-2" style="display:none;">
+                        El plazo debe ser mayor a cero
+                    </div>
+
+                    <!-- Campos condicionales: Préstamo Personal -->
+                    <div id="camposPersonal" class="conditional-fields">
+                        <label for="motivoPersonal" class="form-label">Motivo del préstamo</label>
+                        <input id="motivoPersonal" class="form-control mb-2" placeholder="Motivo del préstamo" required>
+                        <div id="errorMotivoPersonal" class="text-danger mb-2" style="display:none;">
+                            Debe ingresar el motivo del préstamo personal
+                        </div>
+                    </div>
+
+                    <!-- Campos condicionales: Crédito Hipotecario -->
+                    <div id="camposHipotecario" class="conditional-fields">
+                        <label for="tipoVivienda" class="form-label">Tipo de vivienda</label>
+                        <input id="tipoVivienda" class="form-control mb-2" placeholder="Tipo de vivienda" required>
+                        <div id="errorVivienda" class="text-danger mb-2" style="display:none;">
+                            Debe indicar el tipo de vivienda
+                        </div>
+
+                        <label for="inicialHipotecario" class="form-label">Pago inicial (MXN)</label>
+                        <input id="inicialHipotecario" class="form-control mb-2" placeholder="Pago inicial (MXN)"
+                            type="number" min="0" required>
+                        <div id="errorInicialHip" class="text-danger mb-2" style="display:none;">
+                            Debe ingresar un pago inicial válido
+                        </div>
+
+                        <label for="motivoHipotecario" class="form-label">Motivo del crédito hipotecario</label>
+                        <input id="motivoHipotecario" class="form-control mb-2"
+                            placeholder="Motivo del crédito hipotecario" required>
+                        <div id="errorMotivoHip" class="text-danger mb-2" style="display:none;">
+                            Debe ingresar el motivo del crédito hipotecario
+                        </div>
+                    </div>
+
+                    <!-- Campos condicionales: Crédito Automotriz -->
+                    <div id="camposAuto" class="conditional-fields">
+                        <label for="tipoAuto" class="form-label">Tipo de auto</label>
+                        <select id="tipoAuto" class="form-select mb-2" required>
+                            <option value="">Selecciona una opción</option>
+                            <option value="nuevo">Auto Nuevo</option>
+                            <option value="usado">Auto Usado</option>
+                        </select>
+                        <div id="errorTipoAuto" class="text-danger mb-2" style="display:none;">
+                            Debe seleccionar si el auto es nuevo o usado
+                        </div>
+
+                        <label for="inicialAuto" class="form-label">Pago inicial (MXN)</label>
+                        <input id="inicialAuto" class="form-control mb-2" placeholder="Pago inicial (MXN)" type="number"
+                            min="0" required>
+                        <div id="errorInicialAuto" class="text-danger mb-2" style="display:none;">
+                            Debe ingresar un pago inicial válido para auto
+                        </div>
+                    </div>
+
+                    <div class="d-grid gap-3 mt-3">
+                        <button type="button" class="btn btn-success btn-lg" onclick="validarPasoProducto()"
+                            aria-label="Continuar al siguiente paso">
+                            Continuar
+                        </button>
+                    </div>
+                </form>
+            </div>
+            <!-- Paso 1 -->
+            <div class="step">
+                <h5>2. Ingresa el número de documento</h5>
+                <input id="numeroDocumento" class="form-control mb-3" placeholder="Ej. CURP / DNI / RFC" required
+                    pattern=".{8,}">
+                <div id="docError" class="text-danger mb-2" style="display:none;">Debe ingresar al menos 8 caracteres.
+                </div>
+                <div class="d-grid gap-3 mt-3">
+                    <button type="button" class="btn btn-success btn-lg" onclick="validarNumeroDocumento()"
+                        aria-label="Continuar al siguiente paso">Continuar</button>
+                    <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()"
+                        aria-label="Regresar a la pantalla anterior">← Regresar</button>
+                </div>
+            </div>
+            <div class="step">
+                <h5>3. Ofertas disponibles</h5>
+                <div id="resultadoOferta"></div>
+                <div class="text-end">
+                    <small class="text-muted">Selecciona la oferta que prefiera el cliente</small>
+                </div>
+                <div id="selectorOferta" class="form-check mt-3"></div>
+                <div class="d-grid gap-3 mt-3">
+                    <button type="button" class="btn btn-success btn-lg" onclick="nextStep()"
+                        aria-label="Aceptar oferta y continuar">Aceptar Oferta</button>
+                    <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()"
+                        aria-label="Regresar a la pantalla anterior">← Regresar</button>
+                </div>
+            </div>
+            <div class="step">
+                <h5>4. Datos del cliente</h5>
+                <div id="clienteEncontrado" style="display:none;">
+                    <p><strong>Nombre:</strong> Juan Pérez</p>
+                    <p><strong>Email:</strong> juan@email.com</p>
+                    <p><strong>Teléfono:</strong> 5512345678</p>
+                    <p class="text-success">Cliente encontrado en la base</p>
+                    <div class="d-grid gap-3 mt-3">
+                        <button type="button" class="btn btn-success btn-lg" onclick="nextStep()">Continuar</button>
+                        <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()">← Regresar</button>
+                    </div>
+                </div>
+                <div id="clienteNoEncontrado" style="display:block;">
+                    <p class="text-danger">Cliente no encontrado. Se requiere validación biométrica.</p>
+                    <div class="d-grid gap-3 mt-3">
+                        <button type="button" class="btn btn-success btn-lg" onclick="nextStep()">Iniciar
+                            Validación</button>
+                        <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()">← Regresar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="step">
+                <h5>5. Validación biométrica</h5>
+                <label>Frontal del documento</label>
+                <input type="file" class="form-control mb-2" accept="image/*">
+                <label>Reverso del documento</label>
+                <input type="file" class="form-control mb-2" accept="image/*">
+                <label>Selfie con el documento</label>
+                <input type="file" class="form-control mb-2" accept="image/*">
+                <div class="d-grid gap-3 mt-3">
+                    <button type="button" class="btn btn-success btn-lg" onclick="nextStep()">Analizar
+                        Documentos</button>
+                    <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()">← Regresar</button>
+                </div>
+            </div>
+            <div class="step">
+                <p class="text-success">Validación conforme</p>
+                <h5>6. Datos encontrados y validados</h5>
+                <ul>
+                    <li><strong>Nombre:</strong> Juan Pérez</li>
+                    <li><strong>CURP:</strong> PERJ880101HDFRZN07</li>
+                    <li><strong>RFC:</strong> PERJ880101AB3</li>
+                    <li><strong>Fecha de nacimiento:</strong> 01/01/1988</li>
+                </ul>
+                <div class="d-grid gap-3 mt-3">
+                    <button type="button" class="btn btn-success btn-lg" onclick="nextStep()">Continuar</button>
+                    <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()">← Regresar</button>
+                </div>
+            </div>
+            <div class="step">
+                <h5>7. Validación OTP</h5>
+                <label>Hemos enviado un código al número registrado</label>
+                <input class="form-control mb-2" placeholder="Código OTP">
+                <div class="d-grid gap-3 mt-3">
+                    <button type="button" class="btn btn-success btn-lg" onclick="nextStep()">Verificar</button>
+                    <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()">← Regresar</button>
+                </div>
+            </div>
+            <div class="step">
+                <h5>8. Consentimiento para análisis crediticio</h5>
+                <textarea class="form-control mb-3" rows="4" readonly>
+Acepto que mis datos sean utilizados para realizar un análisis crediticio con el buró de crédito.
+      </textarea>
+                <label for="consentimiento" class="form-check-label">Acepto términos</label>
+
+                <div class="d-grid gap-3 mt-3">
+                    <button id="btnEnviarConsentimiento" type="button" class="btn btn-primary btn-lg"
+                        onclick="enviarConsentimientoSMS()" aria-label="Enviar link de consentimiento por SMS">
+                        📲 Enviar link por SMS para consentimiento
+                    </button>
+                    <div id="consentimientoSpinner" style="display:none;" class="text-center">
+                        <div class="spinner-border text-primary" role="status" aria-live="polite">
+                            <span class="visually-hidden">Enviando SMS...</span>
+                        </div>
+                        <div class="mt-2">Esperando respuesta del cliente...</div>
+                    </div>
+                    <div id="consentimientoAprobado" style="display:none;">
+                        <div class="alert alert-success" role="alert">
+                            Consentimiento Aprobado
+                        </div>
+                    </div>
+                    <button id="btnContinuarConsentimiento" type="button" class="btn btn-success btn-lg"
+                        onclick="nextStep()" aria-label="Continuar al siguiente paso" disabled>Continuar</button>
+                    <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()"
+                        aria-label="Regresar a la pantalla anterior">← Regresar</button>
+                </div>
+            </div>
+            <div class="step">
+                <h5>9. Resultado del Scoring</h5>
+                <!-- Gauge con ApexCharts -->
+                <div class="d-flex flex-column align-items-center mb-4">
+                    <div id="gaugeScoring" style="width: 250px; max-width:100%;"></div>
+                    <div class="text-center mt-2">
+                        <span id="score-status" class="badge bg-success" style="font-size:1em;">Aprobado</span>
+                    </div>
+                </div>
+                <!-- Resumen de evaluaciones -->
+                <div class="mb-3">
+                    <div class="row g-2">
+                        <div class="col-12 col-md-4">
+                            <div class="card text-center border-success">
+                                <div class="card-header py-1 bg-success text-white">Buró de Crédito</div>
+                                <div class="card-body py-2">
+                                    <span style="font-size:2em;font-weight:bold;">A</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card text-center border-success">
+                                <div class="card-header py-1 bg-success text-white">Lista Negra Interna</div>
+                                <div class="card-body py-2">
+                                    <span style="font-size:2em;font-weight:bold;">A</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-12 col-md-4">
+                            <div class="card text-center border-warning">
+                                <div class="card-header py-1 bg-warning text-dark">Lista Negra Externa</div>
+                                <div class="card-body py-2">
+                                    <span style="font-size:2em;font-weight:bold;">B</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-success text-center">Puedes continuar con la solicitud del crédito.</p>
+                <div class="d-grid gap-3 mt-3">
+                    <button type="button" class="btn btn-success btn-lg" onclick="nextStep()">Continuar</button>
+                    <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()">← Regresar</button>
+                </div>
+            </div>
+            <div class="step">
+                <h5>10. Documentos adicionales</h5>
+                <label>Comprobante de ingresos</label>
+                <input type="file" class="form-control mb-2">
+                <label>Comprobante de domicilio</label>
+                <input type="file" class="form-control mb-2">
+                <div class="d-grid gap-3 mt-3">
+                    <button type="button" class="btn btn-success btn-lg" onclick="nextStep()">Adjuntar
+                        Documentos</button>
+                    <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()">← Regresar</button>
+                </div>
+            </div>
+            <div class="step">
+                <h5>11. Oferta final</h5>
+                <div class="alert alert-success" role="alert">
+                    ¡Felicidades! El proceso KYC ha sido completado con éxito.
+                </div>
+                <h6>Oferta Final</h6>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item">Monto aprobado: <strong>$100,000 MXN</strong></li>
+                    <li class="list-group-item">Plazo:<strong>24 meses</strong></li>
+                    <li class="list-group-item">Tasa: <strong>18.5%</strong></li>
+                    <li class="list-group-item">Cuota mensual estimada: <strong>$5,250</strong></li>
+                    <li class="list-group-item">Total intereses pagados: <strong>$26,000</strong></li>
+                    <li class="list-group-item">Costo total del seguro: <strong>$3,600</strong></li>
+                </ul>
+                <h6>Pasos realizados</h6>
+                <ul class="list-group mb-3">
+                    <li class="list-group-item">✓ Selección de producto</li>
+                    <li class="list-group-item">✓ Identificación del cliente</li>
+                    <li class="list-group-item">✓ Validación biométrica</li>
+                    <li class="list-group-item">✓ OCR y verificación de datos</li>
+                    <li class="list-group-item">✓ Validación OTP</li>
+                    <li class="list-group-item">✓ Análisis crediticio</li>
+                    <li class="list-group-item">✓ Revisión de listas negras</li>
+                    <li class="list-group-item">✓ Carga de documentos</li>
+                    <li class="list-group-item">✓ Firma electrónica</li>
+                </ul>
+                <div class="d-grid gap-3 mt-3">
+                    <button type="button" class="btn btn-success btn-lg" onclick="nextStep()"
+                        aria-label="Firmar y continuar">Firmar y continuar</button>
+                    <button type="button" class="btn btn-primary btn-lg" onclick="enviarAmortizacion()"
+                        aria-label="Enviar tabla de amortización">📤 Enviar tabla de amortización</button>
+                    <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()"
+                        aria-label="Regresar a la pantalla anterior">← Regresar</button>
+                </div>
+            </div>
+            <div class="step">
+                <h5>12. Firma Electrónica</h5>
+                <p class="mb-3">Selecciona cómo deseas firmar la solicitud de crédito:</p>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" name="firmaMetodo" id="firmaEnLinea" checked>
+                    <label class="form-check-label" for="firmaEnLinea">
+                        Firmar directamente en esta plataforma
+                    </label>
+                </div>
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="radio" name="firmaMetodo" id="firmaSMS">
+                    <label class="form-check-label" for="firmaSMS">
+                        Enviar enlace de firma por SMS
+                    </label>
+                </div>
+                <div id="firmaEnLineaContainer">
+                    <label class="form-label">Firma manuscrita (dibujar con el dedo o mouse)</label>
+                    <canvas id="signaturePad" width="100%" height="200"
+                        style="border:1px solid #ccc; width:100%;"></canvas>
+                </div>
+                <div id="firmaSMSContainer" style="display:none;">
+                    <label>Número de celular</label>
+                    <input class="form-control mb-2" value="5512345678" readonly>
+                    <button type="button" class="btn btn-outline-primary w-100">Enviar Enlace de Firma</button>
+                </div>
+                <div class="d-grid gap-3 mt-3">
+                    <button type="submit" class="btn btn-success btn-lg" aria-label="Aceptar y Finalizar Firma">Aceptar
+                        y Finalizar Firma</button>
+                    <button type="button" class="btn btn-warning btn-lg" onclick="prevStep()"
+                        aria-label="Regresar a la pantalla anterior">← Regresar</button>
+                </div>
+            </div>
+        </form>
+    </div>
+    <script>
+        function validarPasoProducto() {
+            let valid = true;
+
+            const tipo = document.getElementById("tipoCredito");
+            const monto = document.getElementById("montoSolicitado");
+            const plazo = document.getElementById("plazoSolicitado");
+
+            const showError = (input, msgId, msg) => {
+                let errorDiv = document.getElementById(msgId);
+                if (!errorDiv) {
+                    errorDiv = document.createElement("div");
+                    errorDiv.id = msgId;
+                    errorDiv.className = "text-danger mb-2";
+                    input.insertAdjacentElement("afterend", errorDiv);
+                }
+                errorDiv.textContent = msg;
+                errorDiv.style.display = 'block';
+            };
+
+            const clearError = (msgId) => {
+                const div = document.getElementById(msgId);
+                if (div) div.style.display = 'none';
+            };
+
+            if (!tipo.value) {
+                showError(tipo, "errorTipoCredito", "Debe seleccionar un tipo de crédito");
+                valid = false;
+            } else {
+                clearError("errorTipoCredito");
+            }
+
+            if (!monto.value || monto.value <= 0) {
+                showError(monto, "errorMonto", "El monto solicitado debe ser mayor a cero");
+                valid = false;
+            } else {
+                clearError("errorMonto");
+            }
+
+            if (!plazo.value || plazo.value <= 0) {
+                showError(plazo, "errorPlazo", "El plazo debe ser mayor a cero");
+                valid = false;
+            } else {
+                clearError("errorPlazo");
+            }
+
+            if (tipo.value === 'personal') {
+                const motivo = document.querySelector("#camposPersonal input");
+                if (!motivo.value) {
+                    showError(motivo, "errorMotivoPersonal", "Debe ingresar el motivo del préstamo personal");
+                    valid = false;
+                } else {
+                    clearError("errorMotivoPersonal");
+                }
+            }
+
+            if (tipo.value === 'hipotecario') {
+                const vivienda = document.querySelector("#camposHipotecario input[placeholder='Tipo de vivienda']");
+                const inicial = document.getElementById("inicialHipotecario");
+                const motivo = document.querySelector("#camposHipotecario input[placeholder='Motivo del crédito hipotecario']");
+                if (!vivienda.value) {
+                    showError(vivienda, "errorVivienda", "Debe indicar el tipo de vivienda");
+                    valid = false;
+                } else {
+                    clearError("errorVivienda");
+                }
+                if (!inicial.value || inicial.value < 0) {
+                    showError(inicial, "errorInicialHip", "Debe ingresar un pago inicial válido");
+                    valid = false;
+                } else {
+                    clearError("errorInicialHip");
+                }
+                if (!motivo.value) {
+                    showError(motivo, "errorMotivoHip", "Debe ingresar el motivo del crédito hipotecario");
+                    valid = false;
+                } else {
+                    clearError("errorMotivoHip");
+                }
+            }
+
+            if (tipo.value === 'auto') {
+                const selectAuto = document.querySelector("#camposAuto select");
+                const inicial = document.getElementById("inicialAuto");
+                if (!selectAuto.value) {
+                    showError(selectAuto, "errorTipoAuto", "Debe seleccionar si el auto es nuevo o usado");
+                    valid = false;
+                } else {
+                    clearError("errorTipoAuto");
+                }
+                if (!inicial.value || inicial.value < 0) {
+                    showError(inicial, "errorInicialAuto", "Debe ingresar un pago inicial válido para auto");
+                    valid = false;
+                } else {
+                    clearError("errorInicialAuto");
+                }
+            }
+
+            if (valid) nextStep();
+        }
+
+        const showError = (input, msgId, msg) => {
+            let errorDiv = document.getElementById(msgId);
+            if (!errorDiv) {
+                errorDiv = document.createElement("div");
+                errorDiv.id = msgId;
+                errorDiv.className = "text-danger mb-2";
+                input.insertAdjacentElement("afterend", errorDiv);
+            }
+            errorDiv.textContent = msg;
+            errorDiv.style.display = 'block';
+        };
+
+        const clearError = (msgId) => {
+            const div = document.getElementById(msgId);
+            if (div) div.style.display = 'none';
+        };
+
+        function validarNumeroDocumento() {
+            const input = document.getElementById('numeroDocumento');
+            const error = document.getElementById('docError');
+            if (input.value.length < 8) {
+                error.style.display = 'block';
+                input.focus();
+                return;
+            } else {
+                error.style.display = 'none';
+                nextStep();
+            }
+        }
+
+        function enviarAmortizacion() {
+            alert('Tabla de amortización enviada al correo del cliente.');
+        }
+        function enviarConsentimientoSMS() {
+            document.getElementById('btnEnviarConsentimiento').disabled = true;
+            document.getElementById('btnContinuarConsentimiento').disabled = true;
+            document.getElementById('consentimientoSpinner').style.display = 'block';
+            document.getElementById('consentimientoAprobado').style.display = 'none';
+            setTimeout(function () {
+                document.getElementById('consentimientoSpinner').style.display = 'none';
+                document.getElementById('consentimientoAprobado').style.display = 'block';
+                document.getElementById('btnContinuarConsentimiento').disabled = false;
+            }, 5000);
+        }
+        let currentStep = 0;
+        const steps = document.querySelectorAll(".step");
+        const progressBar = document.getElementById("progressBar");
+        function showStep(index) {
+            steps.forEach((step, i) => {
+                step.classList.toggle("active", i === index);
+            });
+            const percent = Math.floor((index) / (steps.length - 1) * 100);
+            progressBar.style.width = `${percent}%`;
+            progressBar.textContent = `${percent}%`;
+            if (currentStep === 2) mostrarOfertas();
+            if (currentStep === 8) {
+                if (typeof renderApexGauge === 'function') renderApexGauge();
+            }
+        }
+        function nextStep() {
+            if (currentStep < steps.length - 1) {
+                currentStep++;
+                showStep(currentStep);
+            }
+        }
+        function mostrarCamposCondicionales() {
+            const tipo = document.getElementById("tipoCredito").value;
+            document.querySelectorAll('.conditional-fields').forEach(el => el.style.display = 'none');
+            if (tipo === 'personal') {
+                document.getElementById('camposPersonal').style.display = 'block';
+            } else if (tipo === 'hipotecario') {
+                document.getElementById('camposHipotecario').style.display = 'block';
+            } else if (tipo === 'auto') {
+                document.getElementById('camposAuto').style.display = 'block';
+            }
+        }
+        function mostrarOfertas() {
+            const tipo = document.getElementById("tipoCredito").value;
+            const monto = parseFloat(document.getElementById("montoSolicitado").value) || 0;
+            const plazo = parseInt(document.getElementById("plazoSolicitado").value) || 0;
+            const inicialHip = parseFloat(document.getElementById("inicialHipotecario")?.value) || 0;
+            const inicialAuto = parseFloat(document.getElementById("inicialAuto")?.value) || 0;
+            let contenido = "<ul class='list-group'>";
+            let radios = "";
+            if (tipo === "personal") {
+                contenido += `<li class='list-group-item d-flex justify-content-between align-items-center'>Opción A: $${monto} a ${plazo} meses - Tasa 18% <span class='badge bg-success'>Recomendado</span></li>`;
+                radios += `<div class='form-check'><input class='form-check-input' type='radio' name='oferta' checked> <label class='form-check-label'>Opción A</label></div>`;
+                if (monto > 100000) {
+                    contenido += `<li class='list-group-item'>Opción B: $90000 a ${plazo} meses - Tasa 16%</li>`;
+                    radios += `<div class='form-check'><input class='form-check-input' type='radio' name='oferta'> <label class='form-check-label'>Opción B</label></div>`;
+                }
+            } else if (tipo === "hipotecario") {
+                const total = monto - inicialHip;
+                contenido += `<li class='list-group-item d-flex justify-content-between align-items-center'>Opción A: $${total} a ${plazo} meses - Tasa 12.5% <span class='badge bg-success'>Recomendado</span></li>`;
+                radios += `<div class='form-check'><input class='form-check-input' type='radio' name='oferta' checked> <label class='form-check-label'>Opción A</label></div>`;
+                if (inicialHip < monto * 0.2) {
+                    contenido += `<li class='list-group-item text-warning'>Contraoferta: Mayor inicial mejora condiciones</li>`;
+                }
+            } else if (tipo === "auto") {
+                const total = monto - inicialAuto;
+                contenido += `<li class='list-group-item d-flex justify-content-between align-items-center'>Opción A: $${total} a ${plazo} meses - Tasa 14% <span class='badge bg-success'>Recomendado</span></li>`;
+                radios += `<div class='form-check'><input class='form-check-input' type='radio' name='oferta' checked> <label class='form-check-label'>Opción A</label></div>`;
+                if (inicialAuto < monto * 0.1) {
+                    contenido += `<li class='list-group-item text-warning'>Contraoferta: Considerar ampliar inicial</li>`;
+                }
+            }
+            contenido += "</ul>";
+            document.getElementById("resultadoOferta").innerHTML = contenido;
+            document.getElementById("selectorOferta").innerHTML = radios;
+        }
+
+        function prevStep() { if (currentStep > 0) { currentStep--; showStep(currentStep); } }
+
+        function cancelProcess() { if (confirm('¿Seguro que deseas cancelar el proceso?')) location.reload(); }
+
+        function renderApexGauge() {
+            var score = 780;
+            var color = '#198754'; // Verde
+            var status = 'Aprobado';
+            if (score < 600) { color = '#dc3545'; status = 'Rechazado'; }
+            else if (score < 700) { color = '#ffc107'; status = 'Observado'; }
+            var options = {
+                chart: { height: 200, type: 'radialBar', offsetY: -10 },
+                plotOptions: {
+                    radialBar: {
+                        startAngle: -120,
+                        endAngle: 120,
+                        hollow: { size: '70%' },
+                        track: {
+                            background: '#e9ecef',
+                            strokeWidth: '97%',
+                        },
+                        dataLabels: {
+                            name: { show: false },
+                            value: {
+                                fontSize: '32px',
+                                color: color,
+                                fontWeight: 600,
+                                show: true,
+                                offsetY: 5,
+                                formatter: function (val) { return score; }
+                            }
+                        }
+                    }
+                },
+                colors: [color],
+                series: [Math.round((score - 300) * 100 / 600)],
+                labels: ['Score']
+            };
+            var chart = new ApexCharts(document.querySelector("#gaugeScoring"), options);
+            chart.render();
+            document.getElementById('score-status').innerText = status;
+            document.getElementById('score-status').className = 'badge ' +
+                (color === '#198754' ? 'bg-success' : color === '#ffc107' ? 'bg-warning text-dark' : 'bg-danger');
+        }
+
+        const metodoEnLinea = document.getElementById('firmaEnLinea');
+        const metodoSMS = document.getElementById('firmaSMS');
+        const containerEnLinea = document.getElementById('firmaEnLineaContainer');
+        const containerSMS = document.getElementById('firmaSMSContainer');
+
+        if (metodoEnLinea && metodoSMS && containerEnLinea && containerSMS) {
+            metodoEnLinea.addEventListener('change', () => {
+                containerEnLinea.style.display = 'block';
+                containerSMS.style.display = 'none';
+            });
+            metodoSMS.addEventListener('change', () => {
+                containerEnLinea.style.display = 'none';
+                containerSMS.style.display = 'block';
+            });
+        }
+
+        showStep(currentStep);
+    </script>
+</body>
+
+</html>
